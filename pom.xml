@@ -86,6 +86,17 @@
                     <mainClass>sk.tuke.gamestudio.server.GameStudioServer</mainClass>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>sk/tuke/gamestudio/SpringClient.java</exclude>
+                        <exclude>sk/tuke/gamestudio/service/*RestClient.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
