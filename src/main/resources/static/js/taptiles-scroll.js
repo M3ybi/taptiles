@@ -88,6 +88,20 @@
             return;
         }
 
+        var entryAuthButton = target.closest('.entry-auth-open');
+        if (entryAuthButton) {
+            event.preventDefault();
+            openEntryAuthModal();
+            return;
+        }
+
+        var entryAuthClose = target.closest('[data-entry-auth-close]');
+        if (entryAuthClose) {
+            event.preventDefault();
+            closeEntryAuthModal();
+            return;
+        }
+
         var modalClose = target.closest('[data-modal-close]');
         if (modalClose) {
             event.preventDefault();
@@ -149,6 +163,7 @@
     document.addEventListener('keydown', function (event) {
         if (event.key === 'Escape') {
             closeNewGameModal();
+            closeEntryAuthModal();
         }
     });
 
@@ -368,6 +383,26 @@
         }
         modal.hidden = true;
         document.body.classList.remove('modal-open');
+    }
+
+    function openEntryAuthModal() {
+        var modal = document.querySelector('.entry-auth-modal');
+        if (!modal) {
+            return;
+        }
+        modal.hidden = false;
+        var firstInput = modal.querySelector('input');
+        if (firstInput) {
+            firstInput.focus();
+        }
+    }
+
+    function closeEntryAuthModal() {
+        var modal = document.querySelector('.entry-auth-modal');
+        if (!modal) {
+            return;
+        }
+        modal.hidden = true;
     }
 
     function getNewGamePlayMode() {

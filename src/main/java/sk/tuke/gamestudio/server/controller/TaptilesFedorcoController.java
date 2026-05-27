@@ -254,6 +254,13 @@ public class TaptilesFedorcoController {
         return "taptiles-fedorco";
     }
 
+    @RequestMapping({TAPTILES_PATH + "/guest", LEGACY_TAPTILES_PATH + "/guest"})
+    public String guest() {
+        username = "guest" + (10000 + new Random().nextInt(90000));
+        rating = 0;
+        return "redirect:/taptiles";
+    }
+
     @RequestMapping({TAPTILES_PATH, LEGACY_TAPTILES_PATH})
     public String taptiles(@RequestParam(name = "column", required = false) String columnString,
                            @RequestParam(value = "row", required = false) String rowString,
@@ -296,7 +303,7 @@ public class TaptilesFedorcoController {
 
     @RequestMapping({TAPTILES_PATH + "/addUsername", LEGACY_TAPTILES_PATH + "/addUsername"})
     public String addUsername(@RequestParam("username") String value, @RequestParam("rating") String rating, Model model) {
-        this.username = value;
+        this.username = sanitizeUsername(value);
         try {
             this.rating = Integer.parseInt(rating);
         } catch (NumberFormatException ignored) {
@@ -315,6 +322,14 @@ public class TaptilesFedorcoController {
             System.out.println("Could not set Rating");
         }
         return "redirect:/taptiles";
+    }
+
+    private String sanitizeUsername(String value) {
+        String normalized = value == null ? "" : value.trim().replaceAll("\\s+", " ");
+        if (normalized.isEmpty()) {
+            return "Player";
+        }
+        return normalized.length() > 24 ? normalized.substring(0, 24) : normalized;
     }
 
     @RequestMapping("/6x6")

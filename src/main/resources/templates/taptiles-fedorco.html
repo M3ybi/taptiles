@@ -17,7 +17,49 @@
     <link rel="stylesheet" type="text/css" th:href="@{/css/Taptiles-Fedorco.css(v='20260527a')}"/>
 </head>
 <body>
-<main class="app-shell">
+<section class="entry-screen" th:if="${!hasCurrentUser}" aria-labelledby="entry-title">
+    <div class="entry-card">
+        <p class="eyebrow">Tile puzzle</p>
+        <h1 id="entry-title">Taptiles</h1>
+        <p>Match equal tiles through clear routes. Guest mode uses a temporary name; sign in/register saves your player name for scores and ratings.</p>
+        <div class="entry-actions">
+            <form th:action="@{/taptiles/guest}">
+                <button class="primary-action" type="submit">Continue as guest</button>
+            </form>
+            <button class="entry-auth-open" type="button">Sign in / Register</button>
+        </div>
+    </div>
+</section>
+
+<section class="entry-auth-modal" th:if="${!hasCurrentUser}" aria-modal="true" aria-labelledby="entry-auth-title" role="dialog" hidden>
+    <div class="entry-auth-backdrop" data-entry-auth-close="true"></div>
+    <div class="entry-auth-dialog">
+        <button class="entry-auth-close" type="button" aria-label="Close" data-entry-auth-close="true">X</button>
+        <p class="eyebrow">Player profile</p>
+        <h2 id="entry-auth-title">Sign in / Register</h2>
+        <p>Choose the player name that appears on your Taptiles scoreboard.</p>
+        <form class="entry-auth-form" th:action="@{/taptiles/addUsername}">
+            <label>
+                Player name
+                <input name="username" type="text" maxlength="24" autocomplete="nickname" required/>
+            </label>
+            <label>
+                Rating
+                <select name="rating" required>
+                    <option value="5">5 - Excellent</option>
+                    <option value="4">4 - Good</option>
+                    <option value="3" selected>3 - OK</option>
+                    <option value="2">2 - Low</option>
+                    <option value="1">1 - Poor</option>
+                    <option value="0">0 - Skip rating</option>
+                </select>
+            </label>
+            <button class="primary-action" type="submit">Continue</button>
+        </form>
+    </div>
+</section>
+
+<main class="app-shell" th:classappend="${!hasCurrentUser ? ' app-shell--entry-hidden' : ''}">
     <header class="app-header">
         <div>
             <a class="back-link" th:href="@{/}">GameStudio</a>
