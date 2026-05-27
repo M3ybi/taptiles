@@ -94,6 +94,7 @@
                     <excludes>
                         <exclude>sk/tuke/gamestudio/SpringClient.java</exclude>
                         <exclude>sk/tuke/gamestudio/service/*RestClient.java</exclude>
+                        <exclude>sk/tuke/gamestudio/server/webservice/*.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
