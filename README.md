@@ -24,3 +24,8 @@ SPRING_DATASOURCE_PASSWORD=<password>
 ```
 
 Render supplies `PORT`; production config binds Spring Boot to that value.
+
+## Render Deployment
+
+Deploy this repo as a Docker web service or Blueprint. The included
+`Dockerfile` builds the Spring Boot WAR with Maven and runs it with Java 8.
