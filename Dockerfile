@@ -11,6 +11,7 @@ WORKDIR /app
 COPY --from=build /app/target/gamestudio_robert_fedorco.war app.war
 
 ENV SPRING_PROFILES_ACTIVE=prod
-EXPOSE 8080
+ENV PORT=10000
+EXPOSE 10000
 
-CMD ["java", "-jar", "app.war", "--spring.profiles.active=prod"]
+CMD ["sh", "-c", "java -jar app.war --spring.profiles.active=prod --server.address=0.0.0.0 --server.port=${PORT:-10000}"]
