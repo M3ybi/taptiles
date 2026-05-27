@@ -14,7 +14,7 @@
             }
         })();
     </script>
-    <link rel="stylesheet" type="text/css" th:href="@{/css/Taptiles-Fedorco.css(v='20260513h')}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/Taptiles-Fedorco.css(v='20260527a')}"/>
 </head>
 <body>
 <main class="app-shell">
@@ -263,34 +263,79 @@
         </section>
 
         <aside class="side-panel" aria-label="Game controls">
-            <section class="challenge-panel" aria-labelledby="challenge-title">
-                <div class="challenge-heading">
-                    <div>
-                        <p class="eyebrow">Challenge</p>
-                        <h2 id="challenge-title" th:text="${dailyChallenge ? 'Daily board' : 'Current board'}">Current board</h2>
-                    </div>
-                    <strong th:text="${tutorialMode ? 'TUTORIAL' : difficulty}">NORMAL</strong>
+            <section class="challenge-panel player-panel" aria-labelledby="challenge-title">
+                <div class="side-tabs" role="tablist" aria-label="Game details">
+                    <button class="side-tab side-tab--active" type="button" role="tab" aria-selected="true"
+                            aria-controls="challenge-tab-panel" data-side-tab="challenge">Board</button>
+                    <button class="side-tab" type="button" role="tab" aria-selected="false"
+                            aria-controls="leaderboard-tab-panel" data-side-tab="leaderboard">My scores</button>
                 </div>
-                <div class="challenge-meta">
-                    <div>
-                        <span>Size</span>
-                        <strong th:text="${boardRows + ' x ' + boardColumns}">6 x 6</strong>
-                    </div>
-                    <div>
-                        <span>Mode</span>
-                        <strong th:text="${tutorialMode ? 'Tutorial' : difficulty}">Normal</strong>
-                    </div>
-                </div>
-                <div class="challenge-actions">
-                    <form th:action="@{/taptiles/daily}">
-                        <button type="submit">Daily board</button>
-                    </form>
-                    <div class="seed-copy">
-                        <label for="board-seed">Board seed</label>
-                        <div class="seed-copy-row">
-                            <input id="board-seed" type="text" th:value="${boardSeed}" readonly inputmode="numeric"/>
-                            <button class="copy-seed" type="button" data-copy-target="board-seed">Copy</button>
+
+                <div id="challenge-tab-panel" class="side-tab-panel side-tab-panel--active"
+                     role="tabpanel" data-side-tab-panel="challenge">
+                    <div class="challenge-heading">
+                        <div>
+                            <p class="eyebrow">Challenge</p>
+                            <h2 id="challenge-title" th:text="${dailyChallenge ? 'Daily board' : 'Current board'}">Current board</h2>
                         </div>
+                        <strong th:text="${tutorialMode ? 'TUTORIAL' : difficulty}">NORMAL</strong>
+                    </div>
+                    <div class="challenge-meta">
+                        <div>
+                            <span>Size</span>
+                            <strong th:text="${boardRows + ' x ' + boardColumns}">6 x 6</strong>
+                        </div>
+                        <div>
+                            <span>Mode</span>
+                            <strong th:text="${tutorialMode ? 'Tutorial' : difficulty}">Normal</strong>
+                        </div>
+                    </div>
+                    <div class="challenge-actions">
+                        <form th:action="@{/taptiles/daily}">
+                            <button type="submit">Daily board</button>
+                        </form>
+                        <div class="seed-copy">
+                            <label for="board-seed">Board seed</label>
+                            <div class="seed-copy-row">
+                                <input id="board-seed" type="text" th:value="${boardSeed}" readonly inputmode="numeric"/>
+                                <button class="copy-seed" type="button" data-copy-target="board-seed">Copy</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="leaderboard-tab-panel" class="side-tab-panel" role="tabpanel"
+                     data-side-tab-panel="leaderboard" hidden>
+                    <div class="leaderboard-heading">
+                        <div>
+                            <p class="eyebrow">Leaderboard</p>
+                            <h2>My scores</h2>
+                        </div>
+                        <strong th:text="${username}">default</strong>
+                    </div>
+                    <p class="leaderboard-empty" th:if="${!hasCurrentUser}">
+                        Set your player name from the rating form to track your personal scores.
+                    </p>
+                    <p class="leaderboard-empty" th:if="${hasCurrentUser && #lists.isEmpty(currentUserScores)}">
+                        No saved scores yet. Complete a normal board to appear here.
+                    </p>
+                    <div class="leaderboard-table-wrap" th:if="${hasCurrentUser && !#lists.isEmpty(currentUserScores)}">
+                        <table class="leaderboard-table">
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Score</th>
+                                <th>Date</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="playerScore, scoreStat : ${currentUserScores}">
+                                <td th:text="${scoreStat.index + 1}">1</td>
+                                <td th:text="${playerScore.points}">120</td>
+                                <td th:text="${#dates.format(playerScore.playedOn, 'dd MMM yyyy')}">27 May 2026</td>
+                            </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </section>
@@ -336,6 +381,6 @@
         </aside>
     </section>
 </main>
-<script th:src="@{/js/taptiles-scroll.js(v='20260513h')}"></script>
+<script th:src="@{/js/taptiles-scroll.js(v='20260527a')}"></script>
 </body>
 </html>

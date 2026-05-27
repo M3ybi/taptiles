@@ -1323,6 +1323,53 @@ button.danger:hover {
     gap: 10px;
 }
 
+.side-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    padding: 5px;
+    background: rgba(15, 23, 42, 0.05);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+}
+
+.side-tab {
+    min-height: 38px;
+    padding: 0 10px;
+    color: var(--muted);
+    background: transparent;
+    border: 0;
+    border-radius: calc(var(--radius) - 3px);
+    box-shadow: none;
+    font-size: 13px;
+}
+
+.side-tab:hover {
+    color: var(--surface-strong);
+    background: rgba(255, 255, 255, 0.64);
+    box-shadow: none;
+}
+
+.side-tab--active {
+    color: #ffffff;
+    background: linear-gradient(135deg, var(--accent), var(--primary));
+    box-shadow: 0 10px 22px rgba(37, 99, 235, 0.18);
+}
+
+.side-tab--active:hover {
+    color: #ffffff;
+    background: linear-gradient(135deg, var(--accent), var(--primary));
+}
+
+.side-tab-panel {
+    display: grid;
+    gap: 10px;
+}
+
+.side-tab-panel[hidden] {
+    display: none;
+}
+
 .challenge-heading {
     display: flex;
     align-items: flex-start;
@@ -1410,6 +1457,75 @@ button.danger:hover {
     background: linear-gradient(135deg, #0f766e, #14b8a6);
 }
 
+.leaderboard-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.leaderboard-heading h2 {
+    margin: 0;
+}
+
+.leaderboard-heading strong {
+    max-width: 150px;
+    padding: 7px 9px;
+    color: var(--primary);
+    background: rgba(37, 99, 235, 0.1);
+    border-radius: 999px;
+    font-size: 11px;
+    line-height: 1;
+    overflow-wrap: anywhere;
+}
+
+.leaderboard-empty {
+    margin: 0;
+    padding: 12px;
+    color: var(--muted);
+    background: rgba(15, 23, 42, 0.04);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.35;
+}
+
+.leaderboard-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+}
+
+.leaderboard-table {
+    min-width: 320px;
+    font-size: 13px;
+}
+
+.leaderboard-table th,
+.leaderboard-table td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--line);
+}
+
+.leaderboard-table th {
+    color: var(--muted);
+    background: rgba(15, 23, 42, 0.04);
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.leaderboard-table td {
+    color: var(--surface-strong);
+    font-weight: 800;
+}
+
+.leaderboard-table tr:last-child td {
+    border-bottom: 0;
+}
+
 label {
     display: grid;
     gap: 6px;
@@ -1443,11 +1559,34 @@ html.theme-dark .stat-tile,
 html.theme-dark .route-card,
 html.theme-dark .rules-list div,
 html.theme-dark .challenge-meta div,
+html.theme-dark .side-tabs,
+html.theme-dark .leaderboard-empty,
+html.theme-dark .leaderboard-table th,
 body.theme-dark .stat-tile,
 body.theme-dark .route-card,
 body.theme-dark .rules-list div,
-body.theme-dark .challenge-meta div {
+body.theme-dark .challenge-meta div,
+body.theme-dark .side-tabs,
+body.theme-dark .leaderboard-empty,
+body.theme-dark .leaderboard-table th {
     background: rgba(31, 42, 61, 0.86);
+    border-color: rgba(178, 196, 221, 0.18);
+}
+
+html.theme-dark .side-tab:hover,
+body.theme-dark .side-tab:hover {
+    background: rgba(15, 23, 42, 0.9);
+}
+
+html.theme-dark .leaderboard-table-wrap,
+body.theme-dark .leaderboard-table-wrap {
+    border-color: rgba(178, 196, 221, 0.18);
+}
+
+html.theme-dark .leaderboard-table th,
+html.theme-dark .leaderboard-table td,
+body.theme-dark .leaderboard-table th,
+body.theme-dark .leaderboard-table td {
     border-color: rgba(178, 196, 221, 0.18);
 }
 

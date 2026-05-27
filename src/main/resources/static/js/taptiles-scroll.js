@@ -6,6 +6,7 @@
         replaceElement('.app-header', next);
         replaceElement('.game-layout', next);
         syncThemeToggle();
+        syncSideTabs();
         closeNewGameModal();
         startTimer();
         drawBoardPaths();
@@ -104,6 +105,13 @@
         if (copyButton) {
             event.preventDefault();
             copyInputValue(copyButton);
+            return;
+        }
+
+        var sideTab = target.closest('[data-side-tab]');
+        if (sideTab) {
+            event.preventDefault();
+            activateSideTab(sideTab.getAttribute('data-side-tab'));
             return;
         }
 
@@ -466,16 +474,59 @@
         }
     }
 
+    function getStoredSideTab() {
+        try {
+            return window.sessionStorage.getItem('taptiles-side-tab') || 'challenge';
+        } catch (ignored) {
+            return 'challenge';
+        }
+    }
+
+    function storeSideTab(tabName) {
+        try {
+            window.sessionStorage.setItem('taptiles-side-tab', tabName);
+        } catch (ignored) {
+        }
+    }
+
+    function activateSideTab(tabName) {
+        var nextTab = tabName === 'leaderboard' ? 'leaderboard' : 'challenge';
+        var buttons = document.querySelectorAll('[data-side-tab]');
+        var panels = document.querySelectorAll('[data-side-tab-panel]');
+
+        buttons.forEach(function (button) {
+            var active = button.getAttribute('data-side-tab') === nextTab;
+            button.classList.toggle('side-tab--active', active);
+            button.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
+
+        panels.forEach(function (panel) {
+            var active = panel.getAttribute('data-side-tab-panel') === nextTab;
+            panel.classList.toggle('side-tab-panel--active', active);
+            panel.hidden = !active;
+        });
+
+        storeSideTab(nextTab);
+    }
+
+    function syncSideTabs() {
+        if (document.querySelector('[data-side-tab]')) {
+            activateSideTab(getStoredSideTab());
+        }
+    }
+
     applyTheme(getStoredTheme() || 'light');
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function () {
             syncThemeToggle();
+            syncSideTabs();
             startTimer();
             drawBoardPaths();
         });
     } else {
         syncThemeToggle();
+        syncSideTabs();
         startTimer();
         drawBoardPaths();
     }

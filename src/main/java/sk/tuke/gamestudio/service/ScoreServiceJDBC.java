@@ -30,6 +30,9 @@ public class ScoreServiceJDBC implements ScoreService {
     public static final String SELECT_SCORE =
         "SELECT game, player, points, playedon FROM score WHERE game = ? ORDER BY points DESC LIMIT 10";
 
+    public static final String SELECT_SCORE_FOR_PLAYER =
+            "SELECT game, player, points, playedon FROM score WHERE game = ? AND player = ? ORDER BY points DESC LIMIT 10";
+
 
     @Override
     public void addScore(Score score) throws ScoreException {
@@ -67,6 +70,31 @@ public class ScoreServiceJDBC implements ScoreService {
             }
         } catch (SQLException e) {
             throw new ScoreException("Error loading score", e);
+        }
+        return scores;
+    }
+
+    @Override
+    public List<Score> getBestScoresForPlayer(String game, String player) throws ScoreException {
+        List<Score> scores = new ArrayList<>();
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
+            try(PreparedStatement ps = connection.prepareStatement(SELECT_SCORE_FOR_PLAYER)){
+                ps.setString(1, game);
+                ps.setString(2, player);
+                try(ResultSet rs = ps.executeQuery()) {
+                    while(rs.next()) {
+                        Score score = new Score(
+                                rs.getString(1),
+                                rs.getString(2),
+                                rs.getInt(3),
+                                rs.getTimestamp(4)
+                        );
+                        scores.add(score);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new ScoreException("Error loading player score", e);
         }
         return scores;
     }

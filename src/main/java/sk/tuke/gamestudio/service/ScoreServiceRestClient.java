@@ -37,4 +37,18 @@ public class ScoreServiceRestClient implements ScoreService {
             throw new ScoreException("Error loading score", e);
         }
     }
+
+    @Override
+    public List<Score> getBestScoresForPlayer(String game, String player) throws ScoreException {
+        try {
+            Client client = ClientBuilder.newClient();
+            return client.target(URL)
+                    .path("/" + game + "/" + player)
+                    .request(MediaType.APPLICATION_JSON)
+                    .get(new GenericType<List<Score>>() {
+                    });
+        } catch (Exception e) {
+            throw new ScoreException("Error loading player score", e);
+        }
+    }
 }

@@ -154,6 +154,23 @@ public class TaptilesFedorcoController {
         return "taptiles-fedorco";
     }
 
+    @RequestMapping({TAPTILES_PATH + "/retry", LEGACY_TAPTILES_PATH + "/retry"})
+    public String retry(@RequestParam("seed") String seed, Model model) {
+        boolean retryDailyChallenge = dailyChallenge;
+        try {
+            boardSeed = Long.parseLong(seed);
+            tutorialMode = false;
+            dailyChallenge = retryDailyChallenge;
+            resetGame(model);
+            boardReady = true;
+            startTime = System.currentTimeMillis();
+            fillModel(model);
+        } catch (NumberFormatException ignored) {
+            fillModel(model);
+        }
+        return "taptiles-fedorco";
+    }
+
     @RequestMapping({TAPTILES_PATH + "/giveUp", LEGACY_TAPTILES_PATH + "/giveUp"})
     public String giveUp() {
         if (!boardReady || failedBoard || abandonedBoard || tutorialMode) {
@@ -444,7 +461,7 @@ public class TaptilesFedorcoController {
             applySuccessfulHit();
             streak++;
             bestStreak = Math.max(bestStreak, streak);
-            checkBoardSolvabilityAfterConnection();
+            checkNextMoveAvailabilityAfterConnection();
         } else {
             applyMiss(row, column);
             streak = 0;
@@ -460,8 +477,8 @@ public class TaptilesFedorcoController {
         return connected;
     }
 
-    private void checkBoardSolvabilityAfterConnection() {
-        if (field.getState() != GameState.PLAYING || (field.hasConnectablePair() && field.canBeSolvedByGreedySearch())) {
+    private void checkNextMoveAvailabilityAfterConnection() {
+        if (field.getState() != GameState.PLAYING || field.hasConnectablePair()) {
             return;
         }
         failedBoard = true;
@@ -505,7 +522,7 @@ public class TaptilesFedorcoController {
 
         if (connected) {
             setLastMatch(firstRow, firstColumn, row, column);
-            checkBoardSolvabilityAfterConnection();
+            checkNextMoveAvailabilityAfterConnection();
             return;
         }
 
@@ -707,7 +724,7 @@ public class TaptilesFedorcoController {
         if (field.connectTile(hintSecondRow, hintSecondColumn)) {
             setLastMatch(hintFirstRow, hintFirstColumn, hintSecondRow, hintSecondColumn);
             streak = 0;
-            checkBoardSolvabilityAfterConnection();
+            checkNextMoveAvailabilityAfterConnection();
         }
         clearHintState();
     }
@@ -823,7 +840,9 @@ public class TaptilesFedorcoController {
         } catch (CommentException ex) {
             System.out.println("Can not load comments.");
         }
-        model.addAttribute("scores", scoreService.getBestScores("TapTiles"));
+        model.addAttribute("scores", loadGlobalScores());
+        model.addAttribute("currentUserScores", loadCurrentUserScores());
+        model.addAttribute("hasCurrentUser", hasCurrentUser());
         if (!"default".equals(username)) {
             try {
                 model.addAttribute("ratings", ratingService.getAverageRating("TapTiles"));
@@ -858,7 +877,32 @@ public class TaptilesFedorcoController {
         if (tutorialMode) {
             return "/taptiles/tutorial?size=" + (field.getRowCount() - 2);
         }
-        return "/taptiles/replay?seed=" + boardSeed;
+        return "/taptiles/retry?seed=" + boardSeed;
+    }
+
+    private List<Score> loadGlobalScores() {
+        try {
+            return scoreService.getBestScores("TapTiles");
+        } catch (ScoreException ex) {
+            System.out.println("Can not load scores.");
+            return Collections.emptyList();
+        }
+    }
+
+    private List<Score> loadCurrentUserScores() {
+        if (!hasCurrentUser()) {
+            return Collections.emptyList();
+        }
+        try {
+            return scoreService.getBestScoresForPlayer("TapTiles", username);
+        } catch (ScoreException ex) {
+            System.out.println("Can not load player scores.");
+            return Collections.emptyList();
+        }
+    }
+
+    private boolean hasCurrentUser() {
+        return username != null && !"default".equals(username.trim()) && !username.trim().isEmpty();
     }
 
     private String getHintPathAttribute() {

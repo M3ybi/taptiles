@@ -3,13 +3,18 @@ package sk.tuke.gamestudio.entity;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import java.io.Serializable;
 import java.util.Date;
 
 @Entity
-@NamedQuery(name = "Score.getBestScores",
-        query = "SELECT s FROM Score s WHERE s.game=:game ORDER BY s.points DESC")
+@NamedQueries({
+        @NamedQuery(name = "Score.getBestScores",
+                query = "SELECT s FROM Score s WHERE s.game=:game ORDER BY s.points DESC"),
+        @NamedQuery(name = "Score.getBestScoresForPlayer",
+                query = "SELECT s FROM Score s WHERE s.game=:game AND s.player=:player ORDER BY s.points DESC")
+})
 public class Score implements Comparable<Score>, Serializable {
     @Id
     @GeneratedValue
