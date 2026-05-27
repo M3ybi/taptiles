@@ -1,0 +1,245 @@
+@charset "UTF-8";
+.item1 {
+    grid-area: header;
+}
+
+.item2 {
+    grid-area: menu;
+}
+
+.item3 {
+    grid-area: main;
+}
+
+.item4 {
+    grid-area: right;
+}
+
+.item5 {
+    grid-area: footer;
+}
+
+h1, h2 {
+    text-align: center;
+    text-shadow: 0 1px 0 #6e6e6e;
+
+}
+nav{
+    text-align: center;
+}
+p span {
+    display: block;
+}
+
+div{
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+html {
+    font-size: 100%;
+    color: #000000;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+
+    background-image: url("../Obrazky/Gradient_builder_2.jpg");
+}
+
+hr {
+    display: block;
+    height: 2px;
+    border: 0;
+    border-top: 1px solid #ccc;
+    margin: 1em 0;
+    padding: 0;
+}
+
+#menuCl{ position:absolute; padding: 0.5em;
+    max-width: 5em; border-radius: 0.5rem;
+    /*background-color: rgb(51, 204, 255); min-width: 4em; }*/
+    background: linear-gradient(to bottom, #ccccff 0%, #ffcccc 100%);}
+#menuCl > a { display: block;}
+#menuClNazov{ border: 0; outline:none;
+    background-color: rgb(46, 70, 110);
+    text-decoration: none; color: rgb(244, 244, 244);
+}
+#menuClNazov:hover, #menuCl > a:hover{
+    text-decoration: none; color: rgb(244, 244, 244);
+    background-color: rgb(65, 89, 137); }
+.skryty {display:none;}
+.zobraz {display:block;}
+
+
+.grid-container {
+    display: grid;
+    grid-template-areas: 'header header header header header header' 'main main main main right right' 'menu footer footer footer footer footer';
+    grid-gap: 10px;
+    padding: 10px;
+}
+
+.grid-container > div {
+    text-align: start;
+    padding: 1px 0;
+
+}
+
+
+
+
+@media only screen and (max-width: 600px) {
+    body {
+        font-size: 0.7rem;
+    }
+
+}
+
+@media only screen and (max-width: 600px) {
+    html {
+        background-image: url("../Obrazky/thumb-1920-474206.jpg");
+    }
+    form{
+        display: none;
+    }
+}
+
+.nav {
+    border-radius: 15px 50px 30px;
+    padding: 1%;
+    margin-left: 36%;
+    width: 25%;
+    border: 2px solid #010001;
+}
+
+
+.scale {
+    transform: scale(1, 1);
+    transition: transform 0.5s ease;
+}
+
+.div:hover .scale {
+    transform: scale(1.3, 1.3);
+}
+
+ul {
+    list-style-type: square;
+    padding-left: 1%;
+    margin: 3%;
+    width: 50%;
+
+}
+
+.slidein {
+    animation-duration: 3s;
+    animation-name: slidein;
+    animation-iteration-count: 1;
+    animation-direction: alternate;
+}
+
+
+@keyframes slidein {
+    from {
+        margin-left: 100%;
+        width: 300%
+    }
+
+    to {
+        margin-left: 0%;
+        width: 100%;
+    }
+}
+
+
+ul.breadcrumb {
+    margin-left: 38%;
+    overflow: hidden;
+    font: 100% Sans-Serif;
+    list-style: none;
+}
+
+ul.breadcrumb li {
+    display: inline;
+    font-size: 100%;
+}
+
+ul.breadcrumb li + li:before {
+    padding: 8px;
+    color: black;
+    content: "/\00a0";
+}
+
+ul.breadcrumb li a {
+    color: #3559ad;
+    text-decoration: none;
+}
+
+ul.breadcrumb li a:hover {
+    color: #01447e;
+    text-decoration: underline;
+}
+
+li.mapaTwo:last-child {
+    border: none;
+}
+
+li.mapaTwo a {
+    text-decoration: none;
+    color: #000;
+
+    -webkit-transition: font-size 0.3s ease, background-color 0.3s ease;
+    -moz-transition: font-size 0.3s ease, background-color 0.3s ease;
+    -o-transition: font-size 0.3s ease, background-color 0.3s ease;
+    transition: font-size 0.3s ease, background-color 0.3s ease;
+    display: block;
+    width: 30%;
+}
+
+li.mapaTwo a:hover {
+    font-size: 100%;
+    background: #f6f6f6;
+}
+
+li.mapaTwo {
+    font-size: 95%;
+    margin-left: 5%;
+    list-style-type: circle;
+    border-bottom: 1px solid #ccc;
+}
+
+li.mapa {
+    font-size: 100%;
+    border-bottom: 1px solid #ccc;
+}
+
+
+li.mapa:last-child {
+    border: none;
+}
+
+li.mapa a {
+    text-decoration: none;
+    color: #000;
+
+    -webkit-transition: font-size 0.3s ease, background-color 0.3s ease;
+    -moz-transition: font-size 0.3s ease, background-color 0.3s ease;
+    -o-transition: font-size 0.3s ease, background-color 0.3s ease;
+    transition: font-size 0.3s ease, background-color 0.3s ease;
+    display: block;
+    width: 30%;
+}
+
+li.mapa a:hover {
+    font-size: 120%;
+    background: #f6f6f6;
+}
+
+
+.div-glow {
+    animation: glowing 5000ms infinite;
+}
+
+ol {
+    list-style-type: upper-roman;
+    padding-left: 1%;
+    margin: 3%;
+    width: 50%;
+}

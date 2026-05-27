@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Taptiles</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <script>
+        (function () {
+            try {
+                if (window.localStorage.getItem('taptiles-theme') === 'dark') {
+                    document.documentElement.classList.add('theme-dark');
+                }
+            } catch (ignored) {
+            }
+        })();
+    </script>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/Taptiles-Fedorco.css(v='20260513h')}"/>
+</head>
+<body>
+<main class="app-shell">
+    <header class="app-header">
+        <div>
+            <a class="back-link" th:href="@{/}">GameStudio</a>
+            <h1>Taptiles</h1>
+            <p class="subtitle">Match equal tiles through clear routes before the board locks itself.</p>
+            <div class="route-guide route-guide--header" aria-label="Connection route examples">
+                <div class="route-card">
+                    <div class="route-mini route-mini--straight" aria-hidden="true">
+                        <span class="route-dot route-dot--start">4</span>
+                        <span class="route-line route-line--horizontal"></span>
+                        <span class="route-arrow route-arrow--right"></span>
+                        <span class="route-dot route-dot--end">4</span>
+                    </div>
+                    <strong>Straight</strong>
+                </div>
+                <div class="route-card">
+                    <div class="route-mini route-mini--corner" aria-hidden="true">
+                        <span class="route-dot route-dot--start">7</span>
+                        <span class="route-line route-line--down"></span>
+                        <span class="route-line route-line--right"></span>
+                        <span class="route-arrow route-arrow--right"></span>
+                        <span class="route-dot route-dot--end">7</span>
+                    </div>
+                    <strong>One turn</strong>
+                </div>
+                <div class="route-card">
+                    <div class="route-mini route-mini--edge" aria-hidden="true">
+                        <span class="route-dot route-dot--start">2</span>
+                        <span class="route-line route-line--up"></span>
+                        <span class="route-line route-line--edge"></span>
+                        <span class="route-line route-line--drop"></span>
+                        <span class="route-arrow route-arrow--down"></span>
+                        <span class="route-dot route-dot--end">2</span>
+                    </div>
+                    <strong>Edge route</strong>
+                </div>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="theme-toggle" type="button" aria-label="Switch color theme">
+                <span class="theme-toggle__icon" aria-hidden="true"></span>
+                <span class="theme-toggle__text">Dark</span>
+            </button>
+            <div class="status-panel">
+                <span class="status-label">State</span>
+                <strong th:text="${gameState}">PLAYING</strong>
+            </div>
+        </div>
+    </header>
+
+    <section class="game-layout" aria-label="Taptiles game">
+        <section class="board-panel" aria-labelledby="board-title">
+            <div class="panel-heading">
+                <div>
+                    <p class="eyebrow" th:text="${tutorialMode ? 'Tutorial board' : 'Board'}">Board</p>
+                    <h2 id="board-title" th:text="${boardRows + ' x ' + boardColumns}">6 x 6</h2>
+                </div>
+                <div class="board-actions" th:classappend="${abandonedBoard ? ' board-actions--priority' : ''}">
+                    <form th:action="@{/taptiles/hint}">
+                        <button class="compact" type="submit"
+                                th:disabled="${!boardReady || failedBoard || abandonedBoard || tutorialMode || hintsRemaining <= 0 || gameState.name() != 'PLAYING'}"
+                                th:text="${hintLabel}">Hint</button>
+                    </form>
+                    <form th:action="@{/taptiles/giveUp}">
+                        <button class="compact danger" type="submit" th:disabled="${!boardReady || failedBoard || abandonedBoard || tutorialMode}">Give up</button>
+                    </form>
+                    <a class="primary-action compact restart-action" th:href="${retryUrl}">Restart</a>
+                    <button class="primary-action compact new-game-open" type="button">New game</button>
+                </div>
+            </div>
+
+            <section class="new-game-modal" aria-modal="true" aria-labelledby="new-game-title" role="dialog" hidden>
+                <div class="new-game-backdrop" data-modal-close="true"></div>
+                <div class="new-game-dialog">
+                    <div class="modal-heading">
+                        <div>
+                            <p class="eyebrow">New game</p>
+                            <h2 id="new-game-title">Choose setup</h2>
+                        </div>
+                        <button class="modal-close" type="button" aria-label="Close new game options" data-modal-close="true">X</button>
+                    </div>
+                    <form class="new-game-form" th:action="@{/taptiles/new}" method="get">
+                        <section class="setup-mode-grid" aria-label="Choose play mode">
+                            <input class="modal-choice-input" id="new-mode-game" type="radio" name="playMode" value="game"
+                                   th:checked="${!tutorialMode}"/>
+                            <label class="setup-mode-card" for="new-mode-game" data-play-mode="game">
+                                <span class="setup-mode-icon" aria-hidden="true">+</span>
+                                <span class="setup-mode-copy">
+                                    <strong>New game</strong>
+                                    <small>Board size and difficulty</small>
+                                </span>
+                            </label>
+                            <input class="modal-choice-input" id="new-mode-tutorial" type="radio" name="playMode" value="tutorial"
+                                   th:checked="${tutorialMode}"/>
+                            <label class="setup-mode-card" for="new-mode-tutorial" data-play-mode="tutorial">
+                                <span class="setup-mode-icon" aria-hidden="true">?</span>
+                                <span class="setup-mode-copy">
+                                    <strong>Tutorial</strong>
+                                    <small>Practice board size</small>
+                                </span>
+                            </label>
+                        </section>
+
+                        <div class="setup-panel modal-option-section--game">
+                            <section class="setup-group">
+                                <p class="eyebrow">Board size</p>
+                                <div class="setup-choice-grid" aria-label="Board size">
+                                    <input class="modal-choice-input" id="new-size-6" type="radio" name="size" value="6"
+                                           th:checked="${boardRows == 6}"/>
+                                    <label class="setup-choice" for="new-size-6" data-play-mode="game">6 x 6</label>
+                                    <input class="modal-choice-input" id="new-size-8" type="radio" name="size" value="8"
+                                           th:checked="${boardRows == 8}"/>
+                                    <label class="setup-choice" for="new-size-8" data-play-mode="game">8 x 8</label>
+                                    <input class="modal-choice-input" id="new-size-10" type="radio" name="size" value="10"
+                                           th:checked="${boardRows == 10}"/>
+                                    <label class="setup-choice" for="new-size-10" data-play-mode="game">10 x 10</label>
+                                </div>
+                            </section>
+
+                            <section class="setup-group">
+                                <p class="eyebrow">Difficulty</p>
+                                <div class="setup-choice-grid setup-choice-grid--difficulty" aria-label="Difficulty">
+                                    <input class="modal-choice-input" id="new-difficulty-easy" type="radio" name="difficulty" value="easy"
+                                           th:checked="${difficulty == 'EASY'}"/>
+                                    <label class="setup-choice" for="new-difficulty-easy" data-play-mode="game">Easy</label>
+                                    <input class="modal-choice-input" id="new-difficulty-normal" type="radio" name="difficulty" value="normal"
+                                           th:checked="${difficulty == 'NORMAL'}"/>
+                                    <label class="setup-choice" for="new-difficulty-normal" data-play-mode="game">Normal</label>
+                                    <input class="modal-choice-input" id="new-difficulty-hard" type="radio" name="difficulty" value="hard"
+                                           th:checked="${difficulty == 'HARD'}"/>
+                                    <label class="setup-choice" for="new-difficulty-hard" data-play-mode="game">Hard</label>
+                                </div>
+                            </section>
+                        </div>
+
+                        <div class="setup-panel modal-option-section--tutorial">
+                            <section class="setup-group">
+                                <p class="eyebrow">Tutorial board size</p>
+                                <div class="setup-choice-grid" aria-label="Tutorial board size">
+                                    <input class="modal-choice-input" id="new-tutorial-6" type="radio" name="tutorialSize" value="6"
+                                           th:checked="${boardRows == 6}"/>
+                                    <label class="setup-choice" for="new-tutorial-6" data-play-mode="tutorial">6 x 6</label>
+                                    <input class="modal-choice-input" id="new-tutorial-8" type="radio" name="tutorialSize" value="8"
+                                           th:checked="${boardRows == 8}"/>
+                                    <label class="setup-choice" for="new-tutorial-8" data-play-mode="tutorial">8 x 8</label>
+                                    <input class="modal-choice-input" id="new-tutorial-10" type="radio" name="tutorialSize" value="10"
+                                           th:checked="${boardRows == 10}"/>
+                                    <label class="setup-choice" for="new-tutorial-10" data-play-mode="tutorial">10 x 10</label>
+                                </div>
+                            </section>
+                        </div>
+                        <div class="modal-actions">
+                            <button class="primary-action compact new-game-confirm" type="submit"
+                                    th:text="${tutorialMode ? 'Start tutorial' : 'Start game'}">Start game</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <div class="game-stats" aria-label="Current game stats">
+                <div class="stat-tile">
+                    <span>Moves</span>
+                    <strong th:text="${moveCount}">0</strong>
+                </div>
+                <div class="stat-tile">
+                    <span>Time</span>
+                    <strong id="elapsedTime"
+                            th:attr="data-elapsed=${elapsedSeconds},data-running=${timerRunning}"
+                            th:text="${elapsedSeconds + 's'}">0s</strong>
+                </div>
+                <div class="stat-tile">
+                    <span>Hints</span>
+                    <strong th:text="${hintsRemaining + '/' + maxHints}">3/3</strong>
+                </div>
+                <div class="stat-tile streak">
+                    <span>Streak</span>
+                    <strong th:text="${streak}">0</strong>
+                </div>
+                <div class="stat-tile stat-tile--score">
+                    <span>Score</span>
+                    <strong th:text="${displayScore}">0</strong>
+                    <em class="score-delta"
+                        th:if="${lastScoreAdjustmentLabel != ''}"
+                        th:classappend="${lastScoreAdjustment >= 0 ? ' positive' : ' negative'}"
+                        th:text="${lastScoreAdjustmentLabel}">+2 match</em>
+                </div>
+            </div>
+
+            <div class="board-stage"
+                 th:classappend="${(!boardReady ? ' board-stage--locked' : '') + (failedBoard ? ' board-stage--failed' : '')}">
+                <div class="board-wrap"
+                     th:attr="data-hint-path=${hintPath},data-tutorial-paths=${tutorialPaths},data-tutorial-mode=${tutorialMode},data-board-rows=${boardRows},data-board-columns=${boardColumns}"
+                     th:utext="${@taptilesFedorcoController.getHTMLField()}"></div>
+                <div class="start-overlay" th:if="${!boardReady}" aria-live="polite">
+                    <div class="start-panel">
+                        <p class="eyebrow">Ready</p>
+                        <strong>Start board</strong>
+                        <span class="countdown-display">3</span>
+                        <button class="start-countdown" type="button" th:attr="data-start-url=@{/taptiles/start}">Start</button>
+                    </div>
+                </div>
+                <div class="failed-overlay" th:if="${failedBoard}" aria-live="assertive">
+                    <div class="failed-overlay-panel">
+                        <p class="eyebrow">No solution</p>
+                        <strong>Board failed</strong>
+                        <span>The remaining tiles cannot be solved from this position.</span>
+                        <a class="primary-action" th:href="${retryUrl}">Retry board</a>
+                    </div>
+                </div>
+            </div>
+
+            <section class="result-panel" th:if="${gameState.name() == 'SOLVED' && !abandonedBoard}" aria-label="Game result">
+                <div>
+                    <p class="eyebrow" th:text="${dailyChallenge ? 'Daily complete' : 'Game complete'}">Game complete</p>
+                    <h2 th:text="${'Grade ' + grade}">Grade A</h2>
+                </div>
+                <div class="result-grid">
+                    <div><span>Time</span><strong th:text="${elapsedSeconds + 's'}">0s</strong></div>
+                    <div><span>Moves</span><strong th:text="${moveCount}">0</strong></div>
+                    <div><span>Hints used</span><strong th:text="${hintsUsed}">0</strong></div>
+                    <div><span>Best streak</span><strong th:text="${bestStreak}">0</strong></div>
+                    <div><span>Score</span><strong th:text="${score}">0</strong></div>
+                    <div><span>Seed</span><strong th:text="${boardSeed}">0</strong></div>
+                </div>
+            </section>
+
+            <section class="abandoned-panel" th:if="${abandonedBoard}" aria-label="Game abandoned">
+                <div>
+                    <p class="eyebrow">Game stopped</p>
+                    <h2>No score counted</h2>
+                    <p>Use Restart to replay this board or New game to choose a fresh setup.</p>
+                </div>
+            </section>
+
+            <section class="failed-panel" th:if="${failedBoard}" aria-label="Board failed">
+                <div>
+                    <p class="eyebrow">No solution</p>
+                    <h2>Board failed</h2>
+                    <p>The remaining tiles cannot be solved from this position.</p>
+                </div>
+                <a class="primary-action" th:href="${retryUrl}">Retry board</a>
+            </section>
+        </section>
+
+        <aside class="side-panel" aria-label="Game controls">
+            <section class="challenge-panel" aria-labelledby="challenge-title">
+                <div class="challenge-heading">
+                    <div>
+                        <p class="eyebrow">Challenge</p>
+                        <h2 id="challenge-title" th:text="${dailyChallenge ? 'Daily board' : 'Current board'}">Current board</h2>
+                    </div>
+                    <strong th:text="${tutorialMode ? 'TUTORIAL' : difficulty}">NORMAL</strong>
+                </div>
+                <div class="challenge-meta">
+                    <div>
+                        <span>Size</span>
+                        <strong th:text="${boardRows + ' x ' + boardColumns}">6 x 6</strong>
+                    </div>
+                    <div>
+                        <span>Mode</span>
+                        <strong th:text="${tutorialMode ? 'Tutorial' : difficulty}">Normal</strong>
+                    </div>
+                </div>
+                <div class="challenge-actions">
+                    <form th:action="@{/taptiles/daily}">
+                        <button type="submit">Daily board</button>
+                    </form>
+                    <div class="seed-copy">
+                        <label for="board-seed">Board seed</label>
+                        <div class="seed-copy-row">
+                            <input id="board-seed" type="text" th:value="${boardSeed}" readonly inputmode="numeric"/>
+                            <button class="copy-seed" type="button" data-copy-target="board-seed">Copy</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="rules-panel" aria-labelledby="rules-title">
+                <p class="eyebrow">How to play</p>
+                <h2 id="rules-title">Rules and scoring</h2>
+                <div class="rules-list">
+                    <div>
+                        <strong>Connect</strong>
+                        <span>Pick two equal numbers with a straight, one-turn, two-turn, or outside-edge route.</span>
+                    </div>
+                    <div>
+                        <strong>Score</strong>
+                        <span>Regular hits add 10 points. Misses subtract 5. Selecting a tile does not change score.</span>
+                    </div>
+                    <div>
+                        <strong>Streak</strong>
+                        <span>Consecutive hits add +1 extra point per streak step, capped at +10.</span>
+                    </div>
+                    <div>
+                        <strong>Grade</strong>
+                        <span>Grades compare your score with the board's possible score and adjust by difficulty.</span>
+                    </div>
+                    <div>
+                        <strong>Failed board</strong>
+                        <span>If no solution remains, the board is blocked and you can retry the same setup.</span>
+                    </div>
+                    <div>
+                        <strong>Tutorial</strong>
+                        <span>Practice mode shows possible routes and does not affect score.</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="no-moves-panel" th:if="${noMoves}">
+                <p>No connectable pair is currently available.</p>
+                <form th:action="@{/taptiles/shuffle}">
+                    <button type="submit">Shuffle remaining tiles</button>
+                </form>
+            </section>
+
+        </aside>
+    </section>
+</main>
+<script th:src="@{/js/taptiles-scroll.js(v='20260513h')}"></script>
+</body>
+</html>
